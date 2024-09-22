@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="fe57b3c5-a7f0-4d54-8255-78c76adb180f" >
+		<http:request-connection host="#[vars.inputParameters.'host']" port="#[vars.inputParameters.'port']" />
+	</http:request-config>
+	<flow name="cafe-p-implementationFlow-createRecord" doc:id="250cc16e-15bb-4376-b5dc-78b791bf30f9" >
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="9264c963-71fc-428d-9af8-d2e648a48ded" variableName="inputPayload"/>
+		<flow-ref doc:name="Flow Reference" doc:id="c86e23e0-04ce-4177-8515-3a29366ba0c0" name="cafe-p-implementationFlow-getRecord"/>
+		<choice doc:name="Choice" doc:id="b204cd97-32fb-4cd1-a6a7-e218a605fb40" >
+			<when expression="#[sizeOf(payload) &gt; 0]">
+				<logger level="INFO" doc:name="Logger" doc:id="a2ca14f4-5f1a-4752-b777-bc3d016f7268" message="customer already exists"/>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="6c8d40d1-3118-400a-a4a5-0600cfcb9b95">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="inputParameters"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"host": Mule::p('cafe-sapi.host'),
+	"method": "POST",
+	"path": Mule::p('cafe-sapi.createRecordPath'),
+	"port": Mule::p('cafe-sapi.port'),
+	"payload": vars.inputPayload
+}
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+				<flow-ref doc:name="common-subflow" doc:id="689bac64-534e-4831-827a-77ae580d95ad" name="common-subflow" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="cafe-p-implementationFlow-updateRecord" doc:id="a9f4959a-11bc-49c7-9da4-86f560115234" >
+		<ee:transform doc:name="Transform Message" doc:id="0c8ca8cb-cb45-4bf4-919a-81c43bd9c9e4" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="inputParameters" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"host": Mule::p('cafe-sapi.host'),
+	"method": "PATCH",
+	"path": Mule::p('cafe-sapi.updateRecordPath'),
+	"port": Mule::p('cafe-sapi.port'),
+	"payload": payload
+	
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="6860cfdf-a2d8-4204-8b77-9911fec60301" name="common-subflow"/>
+	</flow>
+	<flow name="cafe-p-implementationFlow-getRecord" doc:id="5af43276-ab09-4d5e-98ce-75e42d92bf58" >
+		<ee:transform doc:name="Transform Message" doc:id="303aa199-77db-48bf-a058-ed0348438b6d" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="inputParameters" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"host": Mule::p('cafe-sapi.host'),
+	"method": "GET",
+	"path": Mule::p('cafe-sapi.getRecordPath'),
+	"port": Mule::p('cafe-sapi.port'),
+	"queryParams": if(isEmpty(attributes.queryParams.phoneNumber)) payload.phoneNumber else attributes.queryParams.phoneNumber
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="4c68e5f0-f098-469a-bd68-ce25135ca143" name="common-subflow"/>
+	</flow>
+	<sub-flow name="common-subflow" doc:id="62170066-38cc-4ada-aaa2-bd630b00b7bd" >
+		<http:request method="#[vars.inputParameters.'method']" doc:name="Request" doc:id="1a1f9a9a-7db4-4195-8158-8227f5b1a42a" config-ref="HTTP_Request_configuration1" path="#[vars.inputParameters.'path']">
+			<http:body ><![CDATA[#[vars.inputParameters.payload]]]></http:body>
+			<http:query-params ><![CDATA[#[{
+	"phoneNumber": vars.inputParameters.queryParams
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="dbb2c74c-14ae-4560-a7e7-9928a979ea39" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

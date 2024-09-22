@@ -1,0 +1,7 @@
+cafe-sapi:
+  host: "cafe-s-api.us-e2.cloudhub.io"
+  port: "80"
+  createRecordPath: "api/customer/createRecord"
+  updateRecordPath: "api/customer/updateRecord"
+  getRecordPath: "api/customer/getRecord"
+  
