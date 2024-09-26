@@ -6,12 +6,13 @@
     <apikit:config name="cafe-p-api-config" api="cafe-p-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="cafe-p-api-main">
         <http:listener config-ref="cafe-p-api-httpListenerConfig" path="/api/*">
-            <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            <http:response statusCode="#[vars.httpStatusCode default 200]">
+                <http:body ><![CDATA[#[if(!isEmpty(vars.errorMessage)) vars.errorMessage else vars.responcePayload]]]></http:body>
+				<http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
-            <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            <http:error-response statusCode="#[vars.httpStatusCode default 500]">
+                <http:body><![CDATA[#[vars.errorMessage]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
         <apikit:router config-ref="cafe-p-api-config" />
@@ -125,14 +126,6 @@ output application/json
     </flow>
     <flow name="patch:\customer\updateRecord:application\json:cafe-p-api-config">
         <flow-ref doc:name="Flow Reference" doc:id="f4a183a2-1327-49d3-9d4c-85c6944ead33" name="cafe-p-implementationFlow-updateRecord"/>
-		<ee:transform doc:name="Transform Message">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-"record updated successfully" as String {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
     </flow>
     <flow name="get:\customer\getRecord:cafe-p-api-config">
         <flow-ref doc:name="Flow Reference" doc:id="f04a7605-5a53-4963-a942-f6f3bfe7e4f9" name="cafe-p-implementationFlow-getRecord"/>
@@ -149,13 +142,5 @@ output application/json
     </flow>
     <flow name="post:\customer\createRecord:application\json:cafe-p-api-config">
         <flow-ref doc:name="Flow Reference" doc:id="7e9e7937-8158-4240-8ee8-d17eaf8780ff" name="cafe-p-implementationFlow-createRecord"/>
-		<ee:transform doc:name="Transform Message">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-"record is created" as String {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
     </flow>
 </mule>

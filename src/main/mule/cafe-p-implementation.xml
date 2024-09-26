@@ -34,6 +34,37 @@ output application/json
 			</ee:variables>
 		</ee:transform>
 				<flow-ref doc:name="common-subflow" doc:id="689bac64-534e-4831-827a-77ae580d95ad" name="common-subflow" />
+				<choice doc:name="Choice" doc:id="bd474bf9-18ff-4102-9d03-e8dd042c6d07" >
+					<when expression="#[vars.errorMessage != null]" >
+						<set-variable value="#[vars.errorMessage]" doc:name="errorMessage" doc:id="e37d69dc-829d-4f96-b823-4e7705bbc3d0" variableName="errorMessage" />
+						<set-variable value="#[vars.httpSatusCode]" doc:name="httpSatusCode" doc:id="00fdecc7-bb08-4887-ac31-cb604839b50e" variableName="httpSatusCode" />
+					</when>
+					<otherwise >
+						<ee:transform doc:name="Transform Message" doc:id="729cf36c-1b37-41d3-b419-bd9daddda350" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="responcePayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"timeStamp": now(),
+	"APIName": "cafe-p-api",
+	"correlationId": correlationId,
+	"statusCode": attributes.statusCode default 200,
+	"message": "Records created successfully",
+	"payload": payload  
+		
+}]]></ee:set-variable>
+								<ee:set-variable variableName="httpStatusCode" ><![CDATA[201]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+					</otherwise>
+				</choice>
 			</otherwise>
 		</choice>
 	</flow>
@@ -56,6 +87,37 @@ output application/json
 			</ee:variables>
 		</ee:transform>
 		<flow-ref doc:name="Flow Reference" doc:id="6860cfdf-a2d8-4204-8b77-9911fec60301" name="common-subflow"/>
+		<choice doc:name="Choice" doc:id="1a41854f-6191-4a00-a1bc-fef146005eae" >
+			<when expression="#[vars.errorMessage != null]" >
+				<set-variable value="#[vars.errorMessage]" doc:name="errorMessage" doc:id="aff1ad9d-67cc-4b55-9dfb-dab2dc3d7af4" variableName="errorMessage" />
+				<set-variable value="#[vars.httpSatusCode]" doc:name="httpSatusCode" doc:id="25d9070e-cdb2-4ff6-98b7-d0fba6cbdc59" variableName="httpSatusCode" />
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="992f1db3-3c85-47f1-8bb0-9ef53d62a449" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="responcePayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"timeStamp": now(),
+	"APIName": "cafe-p-api",
+	"correlationId": correlationId,
+	"statusCode": attributes.statusCode default 200,
+	"message": "Records updated successfully",
+	"payload": payload  
+		
+}]]></ee:set-variable>
+						<ee:set-variable variableName="httpStatusCode" ><![CDATA[204]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
 	</flow>
 	<flow name="cafe-p-implementationFlow-getRecord" doc:id="5af43276-ab09-4d5e-98ce-75e42d92bf58" >
 		<ee:transform doc:name="Transform Message" doc:id="303aa199-77db-48bf-a058-ed0348438b6d" >
@@ -75,21 +137,90 @@ output application/json
 			</ee:variables>
 		</ee:transform>
 		<flow-ref doc:name="Flow Reference" doc:id="4c68e5f0-f098-469a-bd68-ce25135ca143" name="common-subflow"/>
-	</flow>
-	<sub-flow name="common-subflow" doc:id="62170066-38cc-4ada-aaa2-bd630b00b7bd" >
-		<http:request method="#[vars.inputParameters.'method']" doc:name="Request" doc:id="1a1f9a9a-7db4-4195-8158-8227f5b1a42a" config-ref="HTTP_Request_configuration1" path="#[vars.inputParameters.'path']">
-			<http:body ><![CDATA[#[vars.inputParameters.payload]]]></http:body>
-			<http:query-params ><![CDATA[#[{
-	"phoneNumber": vars.inputParameters.queryParams
-}]]]></http:query-params>
-		</http:request>
-		<ee:transform doc:name="Transform Message" doc:id="dbb2c74c-14ae-4560-a7e7-9928a979ea39" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		<choice doc:name="Choice" doc:id="79d40715-fb1b-4720-85b3-f5e36c93a11c" >
+			<when expression="#[vars.errorMessage != null]" >
+				<set-variable value="#[vars.errorMessage]" doc:name="errorMessage" doc:id="f0622efe-223d-4e7c-9d01-394b493fa4d4" variableName="errorMessage" />
+				<set-variable value="#[vars.httpSatusCode]" doc:name="httpSatusCode" doc:id="a266e27d-26c5-4bc6-98bd-c3fcd1da1429" variableName="httpSatusCode" />
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="3a1a99f1-4afd-4901-b123-e78acba1dff0" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
 payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="responcePayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"timeStamp": now(),
+	"APIName": "cafe-p-api",
+	"correlationId": correlationId,
+	"statusCode": attributes.statusCode default 200,
+	"message": "Records fetched successfully",
+	"payload": payload  
+		
+}]]></ee:set-variable>
+						<ee:set-variable variableName="httpsStatusCode" ><![CDATA[200]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<sub-flow name="common-subflow" doc:id="62170066-38cc-4ada-aaa2-bd630b00b7bd" >
+		<until-successful maxRetries="3" doc:name="Until Successful" doc:id="46149619-1866-4d43-b9c5-59d61da7a038" millisBetweenRetries="30000">
+			<try doc:name="Try" doc:id="eabaf4d7-c283-47dd-818b-486c804ee560">
+			<http:request method="#[vars.inputParameters.'method']" doc:name="Request" doc:id="1a1f9a9a-7db4-4195-8158-8227f5b1a42a" config-ref="HTTP_Request_configuration1" path="#[vars.inputParameters.'path']">
+			<http:body><![CDATA[#[vars.inputParameters.payload]]]></http:body>
+			<http:query-params><![CDATA[#[{
+	"phoneNumber": vars.inputParameters.queryParams
+}]]]></http:query-params>
+		</http:request>
+			<error-handler>
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d050f69a-130b-424c-b3b3-672122cc8b42" type="HTTP:BAD_REQUEST" >
+						<ee:transform doc:name="Transform Message" doc:id="f800c028-8907-4fe5-8d61-6bc6f3a5d365">
+							<ee:message>
+							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="errorMessage" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"timeStamp": now(),
+	"APIName": "cafe-p-api",
+	"correlationId": correlationId,
+	"statusCode": attributes.statusCode default 408,
+	"message": error.description
+ 		
+}]]></ee:set-variable>
+								<ee:set-variable variableName="httpStatusCode" ><![CDATA[408]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+						<logger level="INFO" doc:name="Logger" doc:id="1feea10d-c073-48d2-86f0-2be28c7b5baa" message="#[vars.errorMessage]"/>
+					</on-error-propagate>
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="d0c398f2-5a93-448e-a505-832f6aa6a18e" type="HTTP:TIMEOUT">
+						<ee:transform doc:name="Transform Message" doc:id="deef8e10-b26a-4900-8eaa-c748f820ce50" >
+							<ee:message />
+							<ee:variables >
+								<ee:set-variable variableName="errorMessage" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"timeStamp": now(),
+	"APIName": "cafe-p-api",
+	"correlationId": correlationId,
+	"statusCode": attributes.statusCode default 408,
+	"message": error.description
+ 		
+}]]></ee:set-variable>
+								<ee:set-variable variableName="httpStatusCode" ><![CDATA[408]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+					</on-error-continue>
+			</error-handler>
+		</try>
+		</until-successful>
 	</sub-flow>
 </mule>
