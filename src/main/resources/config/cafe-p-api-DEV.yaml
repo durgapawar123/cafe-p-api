@@ -4,4 +4,7 @@ cafe-sapi:
   createRecordPath: "api/customer/createRecord"
   updateRecordPath: "api/customer/updateRecord"
   getRecordPath: "api/customer/getRecord"
+
+scheduler:
+  time: "3000"
   
